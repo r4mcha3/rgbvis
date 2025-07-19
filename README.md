@@ -22,7 +22,7 @@ The **RGB Color Visualizer** is an interactive web application designed to help 
 
 ## Demo
 
-Try the app live: [RGB Color Visualizer Demo](https://r4mcha3.github.io/rgbcolorvis/) (Add your GitHub Pages link or hosting URL here).
+Try the app live: [RGB Color Visualizer Demo](https://r4mcha3.github.io/rgbcolorvis/)
 
 ## Installation
 
