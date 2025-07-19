@@ -1,0 +1,231 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24Bit RGB Color Visualizer</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>24Bit RGB Color Explained</h1>
+
+        <!-- Red Channel -->
+        <div class="channel">
+            <div class="channel-header">
+                <div class="switch-group">
+                    <div class="bit-values">
+                        <span>128</span>
+                        <span>64</span>
+                        <span>32</span>
+                        <span>16</span>
+                        <span>8</span>
+                        <span>4</span>
+                        <span>2</span>
+                        <span>1</span>
+                    </div>
+                    <div class="switches" id="red-switches">
+                        <label class="switch"><input type="checkbox" data-bit="7" checked><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="6" checked><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="5"><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="4"><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="3"><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="2" checked><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="1" checked><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="0"><span></span></label>
+                    </div>
+                    <div class="bit-states">
+                        <span>1</span>
+                        <span>1</span>
+                        <span>0</span>
+                        <span>0</span>
+                        <span>0</span>
+                        <span>1</span>
+                        <span>1</span>
+                        <span>0</span>
+                    </div>
+                </div>
+                <div class="byte-color" id="red-byte-color"></div>
+            </div>
+            <div class="channel-label">1 Byte Red</div>
+            <div class="values">Red: Decimal <span id="red-decimal">198</span> | HEX <span id="red-hex">C6</span></div>
+        </div>
+
+        <!-- Green Channel -->
+        <div class="channel">
+            <div class="channel-header">
+                <div class="switch-group">
+                    <div class="bit-values">
+                        <span>128</span>
+                        <span>64</span>
+                        <span>32</span>
+                        <span>16</span>
+                        <span>8</span>
+                        <span>4</span>
+                        <span>2</span>
+                        <span>1</span>
+                    </div>
+                    <div class="switches" id="green-switches">
+                        <label class="switch"><input type="checkbox" data-bit="7" checked><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="6"><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="5" checked><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="4"><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="3" checked><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="2" checked><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="1" checked><span></span></label>
+                        <label class="switch"><input type="checkbox" data-bit="0" checked><span></span></label>
+                    </div>
+                    <div class="bit-states">
+                        <span>1</span>
+                        <span>0</span>
+                        <span>1</span>
+                        <span>0</span>
+                        <span>1</span>
+                        <span>1</span>
+                        <span>1</span>
+                        <span>1</span>
+                    </div>
+                </div>
+                <div class="byte-color" id="green-byte-color"></div>
+            </div>
+            <div class="channel-label">1 Byte Green</div>
+            <div class="values">Green: Decimal <span id="green-decimal">175</span> | HEX <span id="green-hex">AF</span></div>
+        </div>
+
+        <!-- Blue Channel -->
+        <div class="channel">
+            <div class="channel-header">
+                <div class="switch-group">
+                    <div class="bit-values">
+                        <span>128</span>
+                        <span>64</span>
+                        <span>32</span>
+                        <span>16</span>
+                        <span>8</span>
+                        <span>4</span>
+                        <span>2</span>
+                        <span>1</span>
+                    </div>
+                    <div class="switches" id="blue-switches">
+    <label class="switch"><input type="checkbox" data-bit="7"><span></span></label>
+    <label class="switch"><input type="checkbox" data-bit="6" checked><span></span></label>
+    <label class="switch"><input type="checkbox" data-bit="5" checked><span></span></label>
+    <label class="switch"><input type="checkbox" data-bit="4"><span></span></label>
+    <label class="switch"><input type="checkbox" data-bit="3"><span></span></label>
+    <label class="switch"><input type="checkbox" data-bit="2"><span></span></label>
+    <label class="switch"><input type="checkbox" data-bit="1"><span></span></label>
+    <label class="switch"><input type="checkbox" data-bit="0"><span></span></label>
+</div>
+                    <div class="bit-states">
+                        <span>0</span>
+                        <span>1</span>
+                        <span>1</span>
+                        <span>0</span>
+                        <span>0</span>
+                        <span>0</span>
+                        <span>0</span>
+                        <span>0</span>
+                    </div>
+                </div>
+                <div class="byte-color" id="blue-byte-color"></div>
+            </div>
+            <div class="channel-label">1 Byte Blue</div>
+            <div class="values">Blue: Decimal <span id="blue-decimal">96</span> | HEX <span id="blue-hex">60</span></div>
+        </div>
+
+        <!-- Mixed Values and Color Preview -->
+        <div class="values">Mixed HEX Value = <span id="mixed-hex">C6AF60</span></div>
+        <div class="values">Mixed RGB Value = <span id="mixed-rgb">198,175,96</span></div>
+        <div class="values">Mixed HSL Value = <span id="mixed-hsl">45°, 45%, 58%</span></div>
+        <div class="values">Color Temperature = <span id="color-temperature">Warm</span></div>
+        <button id="copy-rgb-btn" class="copy-btn">Copy RGB Value</button>
+        <button id="copy-hex-btn" class="copy-btn">Copy HEX Value</button>
+        <button id="reset-btn" class="reset-btn">Reset</button>
+        <button id="randomize-btn" class="copy-btn">Randomize</button>
+        <div class="color-box" id="color-box"></div>
+        <div class="values">Color Name: <span id="color-name">Goldenrod</span></div>
+        <div class="pixel-preview">
+            <span>1 pixel of 24Bit color...</span>
+        </div>
+
+        <!-- Color Reference Section -->
+        <div class="color-reference">
+            <h2>Color Reference</h2>
+            <div class="complementary-color">
+                <p>Complementary Color (Opposite): <span id="complementary-rgb">57,80,159</span></p>
+                <div class="complementary-swatch" id="complementary-swatch"></div>
+            </div>
+            <div class="analogous-colors">
+                <p>Analogous Colors:</p>
+                <div class="analogous-swatch" id="analogous-swatch-1"></div>
+                <div class="analogous-swatch" id="analogous-swatch-2"></div>
+            </div>
+            <div class="color-rule-selector">
+                <label for="color-rule">Color Rule: </label>
+                <select id="color-rule" class="color-rule-dropdown">
+                    <option value="complementary" selected>Complementary</option>
+                    <option value="analogous">Analogous</option>
+                    <option value="shades">Shades</option>
+                    <option value="tints">Tints</option>
+                    <option value="triadic">Triadic</option>
+                </select>
+            </div>
+            <div class="color-rule-display">
+                <div class="color-rule-box" id="color-rule-box-1"></div>
+                <div class="color-rule-box" id="color-rule-box-2"></div>
+                <div class="color-rule-box" id="color-rule-box-3"></div>
+                <div class="color-rule-box" id="color-rule-box-4"></div>
+                <div class="color-rule-box" id="color-rule-box-5"></div>
+            </div>
+            <button id="copy-all-hex-btn" class="copy-btn">Copy All HEX Values</button>
+            <h3>Color Components</h3>
+            <p><strong>Red (R):</strong> Intensity of red light, typically ranging from 0 to 255 in 8-bit systems.</p>
+            <p><strong>Green (G):</strong> Intensity of green light, also ranging from 0 to 255.</p>
+            <p><strong>Blue (B):</strong> Intensity of blue light, ranging from 0 to 255.</p>
+            <p>Each component contributes to the final color by combining in various intensities.</p>
+        </div>
+    </div>
+    <script src="ntc.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
